@@ -1,0 +1,16 @@
+body {
+    margin: 0px;
+}
+
+article {
+    display: flex;
+}
+
+article>* {
+    width: 50%;
+}
+
+.spacer {
+    width: 100%;
+    height: 500px;
+}

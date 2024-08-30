@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>New Scroll-Timeline</title>
+    <link rel="stylesheet" href="./style.css">
+    <!-- imports of source files -->
+    <script src="./src/utils/saveGlobalNames.util.js"></script>
+    <script src="./src/utils/createClass.util.js"></script>
+    <script src="./src/classes/CSSParser.js"></script>
+    <script src="./src/classes/AnimationTimeline.js"></script>
+    <script src="main.js"></script>
+    <!-- testing styles -->
+    <style>
+        /* test object 1 */
+        #container {
+          scroll-timeline-name: --foo;
+          overflow: scroll;
+          height: 500px;
+          border: 1px solid #333;
+        }
+
+        #container #progress {
+          position: fixed;
+          height: 10px;
+          background-color: red;
+          animation: progress linear 10s forwards;
+          animation-timeline: --foo;
+        }
+
+        /* test object 2 */
+        #container2{
+          overflow-y: auto;
+          height: 500px;
+          border: 1px solid green;
+          scroll-timeline-name: --foo;
+        }
+
+        .square{
+          animation: aufploppen 1s linear forwards;
+          animation-timeline: --foo;
+          width: 3rem;
+          height: 3rem;
+          position: fixed;
+        }
+
+        .square:nth-child(2){
+          right: 100px;
+        }
+
+        @keyframes progress {
+          from {
+            width: 0px;
+          }
+          to {
+            width: 50%;
+          }
+        }
+
+        @keyframes aufploppen {
+          from{
+            background-color: green;
+          }
+          to{
+            background-color: blue;
+          }
+        }
+    </style>
+</head>
+<body>
+  <article>
+      <div id="container">
+        <div id="progress"></div>
+        <div class="spacer"></div>
+        <div class="spacer"></div>
+        <div class="spacer"></div>
+    </div>
+    <div id="container2">
+      <div class="square"></div>
+      <div class="square"></div>
+      <div class="spacer"></div>
+      <div class="spacer"></div>
+    </div>
+  </article>
+</body>
+</html>
