@@ -2,6 +2,12 @@
 A Polyfill for Scroll-Timelines (Animation-Timeline), that works down to IE11.
 
 ## Usage
+Add the following code to your HTML, to load the minified CSS-file
+
+```
+<script src="https://raw.githubusercontent.com/marzeckm/Scroll-Timeline-Polyfill/main/dist/scroll-timeline-min.js"></script>
+```
+
 At the moment, the Polyfill can only be used in a `<style>`-tag. The rest of the CSS code (including the animation) can be stored in an external file. Only the `animation-timeline` and the `scroll-timeline-name` need to be defined in a `<style>`-tag directly in the HTML.
 
 ```
