@@ -3,6 +3,8 @@
  * Here everything will be added to save namespace in the global element
  */
 (function(){
+    'use strict';
+    
     window.ScrollTimelinePolyfill = {};
 })();
 /**
@@ -30,6 +32,7 @@
      * 
      * @param { Object} Child 
      * @param { Object } Parent 
+     * @returns { void }
      */
     function extend(Child, Parent) {
         Child.prototype = Object.create(Parent.prototype);
@@ -40,7 +43,7 @@
      * Creates a new ES5-Class
      * 
      * @param { {extends?: Class, methods?: {}, properties: {}} } definition 
-     * @returns 
+     * @returns { Object<T> }
      */
     function createClass(definition) {
         var Parent = definition.extends || Class;
@@ -118,6 +121,8 @@
              */
             parseTimelines: function(cssText, parsedTimelines){
                 cssText = this._removeComments(cssText);
+                cssText = this._removeKeyframes(cssText);
+                cssText = this._removeMediaQueries(cssText);
             
                 // Regex, to collect all CSS-Rules
                 const ruleRegex = /([^{]+)\{([^}]+)\}/g;
@@ -151,9 +156,38 @@
                 return parsedTimelines;
             },
 
+            /**
+             * Removes all comments from the code,
+             * to make the css parsing easier
+             * 
+             * @param { String } cssText 
+             * @returns { String }
+             */
             _removeComments: function(cssText){
                 return cssText.replace(/\/\*[\s\S]*?\*\//g, '');
             },
+
+            /**
+             * Removes all Keyframes from code,
+             * since they are not supported at the moment
+             * 
+             * @param { String } cssText 
+             * @returns { String }
+             */
+            _removeKeyframes: function(cssText) {
+                return cssText.replace(/@keyframes\s+[^{]+\{(?:[^{}]*\{[^}]*\}[^{}]*|\s)*\}/g, '');
+            },
+
+            /**
+             * Removes all Media-Queries from Code,
+             * since they are not supported at the moment
+             * 
+             * @param { String } cssText 
+             * @returns { String }
+             */
+            _removeMediaQueries: function(cssText) {
+                return cssText.replace(/@media[^{]*\{([^{}]*\{[^}]*\}[^{}]*|\s)*\}/g, '');
+            },            
 
             /**
              * 
@@ -239,7 +273,7 @@
              * This fix is needed for IE11 support
              * 
              * @private @function _applyAnimationChanges
-             * @returns { Void }
+             * @returns { void }
              */
             _applyAnimationChanges: function(){
                 this.element.style.display = 'none';
@@ -252,7 +286,10 @@
 })();
 
 (function(){
+    'use strict';
+
     const createClass = window.ScrollTimelinePolyfill.createClass;
+    const debugMessageSupported = 'This wbbbrowser supports "animation-timeline". Polyfill was skipped.';
 
     /**
      * The main class, object is directly created and started
@@ -272,6 +309,7 @@
             /**
              * The actual main function
              * @private @function _main
+             * @returns { void }
              */
             _main: function(){
                 const AnimationTimeline = window.ScrollTimelinePolyfill.AnimationTimeline;
@@ -281,6 +319,7 @@
                 // Stops all Animation, to check for scroll-timelines
                 document.addEventListener('animationstart', function(event){
                     event.target.style.animationPlayState = "paused";
+                    _this._resetAnimation(event.target);
                 });
     
                 // Finds all the files and adds them to the parsedCSS Object 
@@ -327,10 +366,22 @@
              */
             _checkAnimationTimelineSupport: function(){
                 if (window.CSS && window.CSS.supports && CSS.supports('animation-timeline: --works')) {
-                    console.debug('This wbbbrowser supports "animation-timeline". Polyfill was skipped.');
+                    console.debug(debugMessageSupported);
                     return true;
                 }
                 return false;
+            },
+
+            /**
+             * Resets the animation when hot reload is taking 
+             * place in Mozilla Firefox
+             * 
+             * @param { HTMLElement } animationEl 
+             * @returns { void }
+             */
+            _resetAnimation: function(animationEl){
+                animationEl.style.animationName = 'reset';
+                animationEl.style.animationName = '';
             }
         }
     });

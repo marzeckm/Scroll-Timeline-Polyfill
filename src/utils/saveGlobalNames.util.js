@@ -3,5 +3,7 @@
  * Here everything will be added to save namespace in the global element
  */
 (function(){
+    'use strict';
+    
     window.ScrollTimelinePolyfill = {};
 })();

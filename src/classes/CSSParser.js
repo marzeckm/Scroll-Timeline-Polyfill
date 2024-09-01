@@ -28,6 +28,8 @@
              */
             parseTimelines: function(cssText, parsedTimelines){
                 cssText = this._removeComments(cssText);
+                cssText = this._removeKeyframes(cssText);
+                cssText = this._removeMediaQueries(cssText);
             
                 // Regex, to collect all CSS-Rules
                 const ruleRegex = /([^{]+)\{([^}]+)\}/g;
@@ -61,9 +63,38 @@
                 return parsedTimelines;
             },
 
+            /**
+             * Removes all comments from the code,
+             * to make the css parsing easier
+             * 
+             * @param { String } cssText 
+             * @returns { String }
+             */
             _removeComments: function(cssText){
                 return cssText.replace(/\/\*[\s\S]*?\*\//g, '');
             },
+
+            /**
+             * Removes all Keyframes from code,
+             * since they are not supported at the moment
+             * 
+             * @param { String } cssText 
+             * @returns { String }
+             */
+            _removeKeyframes: function(cssText) {
+                return cssText.replace(/@keyframes\s+[^{]+\{(?:[^{}]*\{[^}]*\}[^{}]*|\s)*\}/g, '');
+            },
+
+            /**
+             * Removes all Media-Queries from Code,
+             * since they are not supported at the moment
+             * 
+             * @param { String } cssText 
+             * @returns { String }
+             */
+            _removeMediaQueries: function(cssText) {
+                return cssText.replace(/@media[^{]*\{([^{}]*\{[^}]*\}[^{}]*|\s)*\}/g, '');
+            },            
 
             /**
              * 

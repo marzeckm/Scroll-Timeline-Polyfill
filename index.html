@@ -29,6 +29,15 @@
           animation-timeline: --foo;
         }
 
+        @keyframes progress {
+          from {
+            width: 0px;
+          }
+          to {
+            width: 50%;
+          }
+        }
+
         /* test object 2 */
         #container2{
           overflow-y: auto;
@@ -47,15 +56,6 @@
 
         .square:nth-child(2){
           right: 100px;
-        }
-
-        @keyframes progress {
-          from {
-            width: 0px;
-          }
-          to {
-            width: 50%;
-          }
         }
 
         @keyframes aufploppen {

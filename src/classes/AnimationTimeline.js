@@ -59,7 +59,7 @@
              * This fix is needed for IE11 support
              * 
              * @private @function _applyAnimationChanges
-             * @returns { Void }
+             * @returns { void }
              */
             _applyAnimationChanges: function(){
                 this.element.style.display = 'none';

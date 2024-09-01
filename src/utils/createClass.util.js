@@ -23,6 +23,7 @@
      * 
      * @param { Object} Child 
      * @param { Object } Parent 
+     * @returns { void }
      */
     function extend(Child, Parent) {
         Child.prototype = Object.create(Parent.prototype);
@@ -33,7 +34,7 @@
      * Creates a new ES5-Class
      * 
      * @param { {extends?: Class, methods?: {}, properties: {}} } definition 
-     * @returns 
+     * @returns { Object<T> }
      */
     function createClass(definition) {
         var Parent = definition.extends || Class;

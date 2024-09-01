@@ -1,6 +1,9 @@
 
 (function(){
+    'use strict';
+
     const createClass = window.ScrollTimelinePolyfill.createClass;
+    const debugMessageSupported = 'This wbbbrowser supports "animation-timeline". Polyfill was skipped.';
 
     /**
      * The main class, object is directly created and started
@@ -20,6 +23,7 @@
             /**
              * The actual main function
              * @private @function _main
+             * @returns { void }
              */
             _main: function(){
                 const AnimationTimeline = window.ScrollTimelinePolyfill.AnimationTimeline;
@@ -29,6 +33,7 @@
                 // Stops all Animation, to check for scroll-timelines
                 document.addEventListener('animationstart', function(event){
                     event.target.style.animationPlayState = "paused";
+                    _this._resetAnimation(event.target);
                 });
     
                 // Finds all the files and adds them to the parsedCSS Object 
@@ -75,10 +80,22 @@
              */
             _checkAnimationTimelineSupport: function(){
                 if (window.CSS && window.CSS.supports && CSS.supports('animation-timeline: --works')) {
-                    console.debug('This wbbbrowser supports "animation-timeline". Polyfill was skipped.');
+                    console.debug(debugMessageSupported);
                     return true;
                 }
                 return false;
+            },
+
+            /**
+             * Resets the animation when hot reload is taking 
+             * place in Mozilla Firefox
+             * 
+             * @param { HTMLElement } animationEl 
+             * @returns { void }
+             */
+            _resetAnimation: function(animationEl){
+                animationEl.style.animationName = 'reset';
+                animationEl.style.animationName = '';
             }
         }
     });
