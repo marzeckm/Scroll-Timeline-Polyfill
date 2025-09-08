@@ -36,8 +36,8 @@
                 var match;
             
                 while ((match = ruleRegex.exec(cssText)) !== null) {
-                    const selectorGroup = match[1].trim();  // Selektor(en)
-                    const declarations = match[2].trim();   // CSS-Eigenschaften
+                    const selectorGroup = match[1].trim();  // Selector(s)
+                    const declarations = match[2].trim();   // CSS property
             
                     // Split selectors, when multiple are available
                     const selectors = selectorGroup.split(',');
