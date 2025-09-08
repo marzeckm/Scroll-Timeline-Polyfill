@@ -91,6 +91,37 @@
 
     window.ScrollTimelinePolyfill.createClass = createClass;
 }());
+/*
+ * Polyfill für Element.matches (IE11 und ältere Browser)
+ */ 
+if (!Element.prototype.matches) {
+  Element.prototype.matches =
+    Element.prototype.msMatchesSelector ||
+    Element.prototype.webkitMatchesSelector ||
+    Element.prototype.mozMatchesSelector ||
+    Element.prototype.oMatchesSelector ||
+    function(selector) {
+      var matches = (this.document || this.ownerDocument).querySelectorAll(selector);
+      for (var i = 0; i < matches.length; i++) {
+        if (matches[i] === this) return true;
+      }
+      return false;
+    };
+}
+
+/**
+ * Polyfill für Element.closest (IE11 und ältere Browser)
+ */
+if (!Element.prototype.closest) {
+  Element.prototype.closest = function(selector) {
+    var el = this;
+    do {
+      if (el.matches(selector)) return el;
+      el = el.parentElement || el.parentNode;
+    } while (el && el.nodeType === 1);
+    return null;
+  };
+}
 (function() { 
     'use strict';
 
@@ -325,41 +356,42 @@
                             
                     // goes through every found timeline
                     Object.keys(parsedCSS['timelines']).forEach(function(selectorTimeline){
+                        const animationTimelineEls = document.querySelectorAll(selectorTimeline);
 
                         // Checks if there are scrollContainers with fitting names
                         const scrollContainers = Object.keys(parsedCSS['names']).map(function(selectorContainer){
                             const selector = parsedCSS['timelines'][selectorTimeline];
                             return parsedCSS['names'][selectorContainer] === selector ? selectorContainer : null;
                         });
-    
-                        // Finds all the ScrollContainer elements
-                        var scrollContainerEls = [];
-                        scrollContainers.filter(function(element){ return !!element;}).forEach(function(scrollContainer){
-                            scrollContainerEls = scrollContainerEls.concat(Array.prototype.slice.call(document.querySelectorAll(scrollContainer)));
-                        });
-            
-                        // Goes through every ScrollContainer element and checks, if the animation-timeline exists
-                        Array.prototype.forEach.call(scrollContainerEls, function(scrollContainerEl){
-                            const animationTimelineEls = scrollContainerEl.querySelectorAll(selectorTimeline);
-                            Array.prototype.forEach.call(animationTimelineEls, function(animationTimelineEl){
-                                const specifity = _this._calculateSpecificity(selectorTimeline);
-                                const oldSepcifity = animationTimelineEl.getAttribute('animation-timeline-selector-specifity');
 
-                                if(!oldSepcifity || _this._compareSpecifity(specifity, JSON.parse(oldSepcifity))){
-                                    animationTimelineEl.setAttribute('has-animation-timeline', selectorTimeline);
-                                    animationTimelineEl.setAttribute('animation-timeline-selector-specifity', JSON.stringify(specifity));
-                                    _this._pushAnimation(scrollContainerEl, animationTimelineEl);
-                                }
+                        // Get the container of each element
+                        Array.prototype.forEach.call(animationTimelineEls, function(animationTimelineEl){
+                            const check = {hasContainer: false};
+                            _this._pushAnimation(null, animationTimelineEl, [0, 0, 0]);
+
+                            scrollContainers.forEach(function(scrollContainer){
+                                if(check.hasContainer) return;
+
+                                const scrollContainerEl = animationTimelineEl.closest(scrollContainer);
+                                const specifity = _this._calculateSpecificity(selectorTimeline);
+
+                                animationTimelineEl.setAttribute('has-animation-timeline', 'TRUE');                         
+                                _this._pushAnimation(scrollContainerEl, animationTimelineEl, specifity);
+
+                                if(!!scrollContainerEl) check.hasContainer = true;
                             });
                         });
                     });
 
                     _this._timelineAnimations.forEach(function(timelineAnimation){
-                        new AnimationTimeline(timelineAnimation.container, timelineAnimation.element);
+                        if(timelineAnimation.container)
+                            new AnimationTimeline(timelineAnimation.container, timelineAnimation.element);
                     });
-                });
 
-                this._resumeAnimations();
+                    setTimeout(function(){
+                        _this._resumeAnimations();
+                    }, 100);
+                });
             },
 
             /**
@@ -387,7 +419,7 @@
             _checkAnimationTimelineSupport: function(){
                 if (window.CSS && window.CSS.supports && CSS.supports('animation-timeline: --works')) {
                     console.debug(debugMessageSupported);
-                    return true;
+                    return false;
                 }
                 return false;
             },
@@ -410,10 +442,15 @@
              * Resumes animations of elements that are not scroll timelines
              */
             _resumeAnimations: function(){
-                document.addEventListener('animationstart', function(event){
-                    const stoppedAnimationEl = event.target;
+                const _this = this;
+                const pausedComputed = Array.prototype.slice.call(document.querySelectorAll('[style]')).filter(function(el){
+                    return getComputedStyle(el).animationPlayState === 'paused';
+                });
+
+                pausedComputed.forEach(function(stoppedAnimationEl){
                     if(!stoppedAnimationEl.getAttribute('has-animation-timeline')){
                         stoppedAnimationEl.style.removeProperty('animation-play-state');
+                        _this._resetAnimation(stoppedAnimationEl);
                     }
                 });
             },
@@ -436,13 +473,19 @@
              * @param { HTMLElement } element
              * @param { Boolean } _exists
              */
-            _pushAnimation: function(container, element, _exists){
+            _pushAnimation: function(container, element, specifity, _exists){
+                const _this = this;
                 _exists = false;
 
                 this._timelineAnimations.forEach(function(timelineAnimation){
                     if(timelineAnimation.element === element){
+                        const index = _this._timelineAnimations.indexOf(timelineAnimation);
+                        const timelineEl = _this._timelineAnimations[index];
                         _exists = true;
-                        timelineAnimation.container = container;
+
+                        if(!timelineEl.specifity || _this._compareSpecifity(specifity, timelineEl.specifity)){
+                            _this._timelineAnimations[index].container = container;
+                        }
                     }
                 });
 
