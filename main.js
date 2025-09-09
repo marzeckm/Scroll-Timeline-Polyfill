@@ -36,15 +36,16 @@
                 // Finds all the files and adds them to the parsedCSS Object 
                 document.addEventListener('DOMContentLoaded', function(){
                     const parsedCSS = _this._extractCss();
+                    console.log(parsedCSS);
                             
                     // goes through every found timeline
                     Object.keys(parsedCSS['timelines']).forEach(function(selectorTimeline){
                         const animationTimelineEls = document.querySelectorAll(selectorTimeline);
+                        const animationTimeline =  parsedCSS['timelines'][selectorTimeline];
 
                         // Checks if there are scrollContainers with fitting names
                         const scrollContainers = Object.keys(parsedCSS['names']).map(function(selectorContainer){
-                            const selector = parsedCSS['timelines'][selectorTimeline];
-                            return parsedCSS['names'][selectorContainer] === selector ? selectorContainer : null;
+                            return parsedCSS['names'][selectorContainer].name === animationTimeline.name ? selectorContainer : null;
                         });
 
                         // Get the container of each element
@@ -56,10 +57,11 @@
                                 if(check.hasContainer) return;
 
                                 const scrollContainerEl = animationTimelineEl.closest(scrollContainer);
-                                const specifity = _this._calculateSpecificity(selectorTimeline);
+                                const axis = parsedCSS['names'][scrollContainer] ? parsedCSS['names'][scrollContainer].axis : 'block';
 
-                                animationTimelineEl.setAttribute('has-animation-timeline', 'TRUE');                         
-                                _this._pushAnimation(scrollContainerEl, animationTimelineEl, specifity);
+                                animationTimelineEl.setAttribute('has-animation-timeline', 'TRUE');
+
+                                _this._pushAnimation(scrollContainerEl, animationTimelineEl, axis, animationTimeline.specifity);
 
                                 if(!!scrollContainerEl) check.hasContainer = true;
                             });
@@ -68,7 +70,7 @@
 
                     _this._timelineAnimations.forEach(function(timelineAnimation){
                         if(timelineAnimation.container)
-                            new AnimationTimeline(timelineAnimation.container, timelineAnimation.element);
+                            new AnimationTimeline(timelineAnimation.container, timelineAnimation.element, timelineAnimation.axis);
                     });
 
                     setTimeout(function(){
@@ -84,12 +86,30 @@
              * @returns { String }
              */
             _extractCss: function(parsedCSS){
+                const RestService = window.ScrollTimelinePolyfill.RestService;
                 const CSSParser = window.ScrollTimelinePolyfill.CSSParser;
-                const cssParser = new CSSParser();                   
+                
+                const cssParser = new CSSParser();
+                const restService = new RestService();
+
+                const allowExtFiles = document.querySelector('meta[name="scroll-timeline-ext_css"]');
+                const styleElements = !!allowExtFiles && allowExtFiles.getAttribute('content') === 'TRUE' ? 'link[rel="stylesheet"], style' : 'style';
 
                 parsedCSS = {'timelines': {}, 'names': {}};
-                Array.prototype.forEach.call(document.querySelectorAll('style'), function(styleSheet){
-                    parsedCSS = cssParser.parseTimelines(styleSheet.innerText, parsedCSS);
+                Array.prototype.forEach.call(document.querySelectorAll(styleElements), function(styleSheet){
+                    if(styleSheet.tagName === 'LINK'){
+                        parsedCSS = cssParser.parseTimelines(restService.get(styleSheet.href), parsedCSS);
+                    }else{
+                        parsedCSS = cssParser.parseTimelines(styleSheet.innerText, parsedCSS);
+                    }
+                });
+
+                Array.prototype.forEach.call(document.querySelectorAll('[style]'), function(inlineEl){
+                    ['scroll-timeline', 'animation-timeline'].forEach(function(match){
+                        if(inlineEl.getAttribute('style').indexOf(match) >= 0){
+                            parsedCSS = cssParser.parseInlineTimelines(inlineEl, parsedCSS);
+                        }
+                    });
                 });
 
                 return parsedCSS;
@@ -102,7 +122,7 @@
             _checkAnimationTimelineSupport: function(){
                 if (window.CSS && window.CSS.supports && CSS.supports('animation-timeline: --works')) {
                     console.debug(debugMessageSupported);
-                    return false;
+                    return true;
                 }
                 return false;
             },
@@ -125,15 +145,14 @@
              * Resumes animations of elements that are not scroll timelines
              */
             _resumeAnimations: function(){
-                const _this = this;
                 const pausedComputed = Array.prototype.slice.call(document.querySelectorAll('[style]')).filter(function(el){
                     return getComputedStyle(el).animationPlayState === 'paused';
                 });
 
                 pausedComputed.forEach(function(stoppedAnimationEl){
                     if(!stoppedAnimationEl.getAttribute('has-animation-timeline')){
+                        stoppedAnimationEl.style.animationPlayState = 'running';
                         stoppedAnimationEl.style.removeProperty('animation-play-state');
-                        _this._resetAnimation(stoppedAnimationEl);
                     }
                 });
             },
@@ -156,7 +175,7 @@
              * @param { HTMLElement } element
              * @param { Boolean } _exists
              */
-            _pushAnimation: function(container, element, specifity, _exists){
+            _pushAnimation: function(container, element, axis, specifity, _exists){
                 const _this = this;
                 _exists = false;
 
@@ -168,30 +187,14 @@
 
                         if(!timelineEl.specifity || _this._compareSpecifity(specifity, timelineEl.specifity)){
                             _this._timelineAnimations[index].container = container;
+                            _this._timelineAnimations[index].axis = axis;
                         }
                     }
                 });
 
                 if(!_exists){
-                    this._timelineAnimations.push({container: container, element: element});
+                    this._timelineAnimations.push({container: container, element: element, axis: axis});
                 }
-            },
-
-            /**
-             * Calculates the specifity for a Selector
-             * 
-             * @param { String } selector 
-             * @returns { Integer[] }
-             */
-            _calculateSpecificity: function(selector) {
-                const idCount      = (selector.match(/#[\w-]+/g) || []).length; 
-                const classCount   = (selector.match(/\.[\w-]+/g) || []).length;
-                const attrCount    = (selector.match(/\[[^\]]+\]/g) || []).length;
-                const pseudoClass  = (selector.match(/:[^:\s]+/g) || []).length;
-                const typeCount    = (selector.match(/(^|[\s>+~])\w+/g) || []).length; 
-
-                // b = classCount + attrCount + pseudoClass
-                return [ idCount, classCount + attrCount + pseudoClass, typeCount ];
             },
 
             /**

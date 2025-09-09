@@ -3,13 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="scroll-timeline-ext_css" content="TRUE">
     <title>New Scroll-Timeline</title>
     <link rel="stylesheet" href="./style.css">
     <!-- imports of source files -->
     <script src="./src/utils/saveGlobalNames.util.js"></script>
     <script src="./src/utils/createClass.util.js"></script>
     <script src="./src/utils/closest.util.js"></script>
+    <script src="./src/utils/generateUuid.util.js"></script>
     <script src="./src/classes/CSSParser.js"></script>
+    <script src="./src/classes/RestService.js"></script>
     <script src="./src/classes/AnimationTimeline.js"></script>
     <script src="main.js"></script>
     <!-- testing styles -->
@@ -22,11 +25,7 @@
           border: 1px solid #333;
         }
 
-        #container #progress {
-          position: fixed;
-          height: 10px;
-          background-color: red;
-          animation: progress linear 10s forwards;
+        #container .progress {
           animation-timeline: --foo;
         }
 
@@ -72,18 +71,29 @@
 </head>
 <body>
   <article>
+    <section class="row">
       <div id="container">
-        <div id="progress"></div>
+        <div class="progress"></div>
         <div class="spacer"></div>
         <div class="spacer"></div>
         <div class="spacer"></div>
-    </div>
-    <div id="container2">
-      <div class="square"></div>
-      <div class="square"></div>
-      <div class="spacer"></div>
-      <div class="spacer"></div>
-    </div>
+      </div>
+      <div id="container2">
+        <div class="square"></div>
+        <div class="square"></div>
+        <div class="spacer"></div>
+        <div class="spacer"></div>
+      </div>
+    </section>
+    <section class="row">
+      <div id="container3">
+        <div class="progress" style="animation-timeline: --bar;"></div>
+        <div class="vertical-spacer">&nbsp;</div>
+      </div>
+      <div id="container4">
+        <div class="progress-none"></div>
+      </div>
+    </section>
   </article>
 </body>
 </html>

@@ -51,7 +51,10 @@
                         const scrollTimelineNameMatch = _this._checkScrollTimelineName(declarations);
 
                         if(animationTimelineMatch){
-                            parsedTimelines['timelines'][selector] = animationTimelineMatch;
+                            parsedTimelines['timelines'][selector] = {
+                                name: animationTimelineMatch,
+                                specifity: _this._calculateSpecificity(selector)
+                            }
                         }
 
                         if(scrollTimelineNameMatch){
@@ -60,6 +63,36 @@
                     });
                 }
             
+                return parsedTimelines;
+            },
+
+            /**
+             * Parses inline CSS Code
+             * 
+             * @param { HTMLElement } element 
+             * @param { Object } parsedTimelines 
+             * @returns 
+             */
+            parseInlineTimelines: function(element, parsedTimelines){
+                const uuid = crypto.randomUUID();
+                const selector = ['[scroll-timeline-id="', uuid, '"]'].join('');
+
+                const animationTimelineMatch = this._checkAnimationTimeline(element.getAttribute('style'));
+                const scrollTimelineNameMatch = this._checkScrollTimelineName(element.getAttribute('style'));
+
+                element.setAttribute('scroll-timeline-id', uuid);
+
+                if(animationTimelineMatch){
+                    parsedTimelines['timelines'][selector] = {
+                        name: animationTimelineMatch,
+                        specifity: [999, 0, 0]
+                    }
+                }
+
+                if(scrollTimelineNameMatch){
+                    parsedTimelines['names'][selector] = scrollTimelineNameMatch
+                }
+
                 return parsedTimelines;
             },
 
@@ -111,9 +144,39 @@
              * @returns { String | null}
              */
             _checkScrollTimelineName: function(declarations){
+                const scrollTimeline = {name: null, axis: 'block'};
+                const scrollTimelineMatch = declarations.match(/scroll-timeline\s*:\s*([^;]+)/);
                 const scrollTimelineNameMatch = declarations.match(/scroll-timeline-name\s*:\s*([^;]+)/);
-                return scrollTimelineNameMatch ? scrollTimelineNameMatch[1].trim() : null;
-            }
+                const scrollTimelineAxisMatch = declarations.match(/scroll-timeline-axis\s*:\s*([^;]+)/);
+
+                if(scrollTimelineMatch){
+                    const temp = scrollTimelineMatch[1].trim().split(' ');
+                    scrollTimeline.name = temp[0];
+                    scrollTimeline.axis = temp[1] ? temp[1] : scrollTimeline.axis;
+                }
+
+                scrollTimeline.name = scrollTimelineNameMatch ? scrollTimelineNameMatch[1].trim() : scrollTimeline.name;
+                scrollTimeline.axis = scrollTimelineAxisMatch ? scrollTimelineAxisMatch[1].trim() : scrollTimeline.axis;
+
+                return !!scrollTimeline.name ? scrollTimeline : null;
+            },
+
+            /**
+             * Calculates the specifity for a Selector
+             * 
+             * @param { String } selector 
+             * @returns { Integer[] }
+             */
+            _calculateSpecificity: function(selector) {
+                const idCount      = (selector.match(/#[\w-]+/g) || []).length; 
+                const classCount   = (selector.match(/\.[\w-]+/g) || []).length;
+                const attrCount    = (selector.match(/\[[^\]]+\]/g) || []).length;
+                const pseudoClass  = (selector.match(/:[^:\s]+/g) || []).length;
+                const typeCount    = (selector.match(/(^|[\s>+~])\w+/g) || []).length; 
+
+                // b = classCount + attrCount + pseudoClass
+                return [ idCount, classCount + attrCount + pseudoClass, typeCount ];
+            },
         }
     });
 

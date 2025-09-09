@@ -2,15 +2,48 @@ body {
     margin: 0px;
 }
 
-article {
+section{
     display: flex;
 }
 
-article>* {
+section>* {
     width: 50%;
 }
 
 .spacer {
     width: 100%;
     height: 500px;
+}
+
+.vertical-spacer{
+    width: 200vw;
+}
+
+/* test object 3 */
+#container3{
+    border: 1px solid green;
+    height: 500px;
+    overflow-x: auto;
+    scroll-timeline: --bar inline;
+}
+
+.progress{
+    position: fixed;
+    height: 10px;
+    background-color: red;
+    animation: progress linear 10s forwards;
+}
+
+/* Test Object 4 */
+#container4{
+    border: 1px solid green;
+    height: 500px;
+    overflow-x: auto;
+}
+
+#container4 .progress-none{
+    position: fixed;
+    height: 10px;
+    background-color: red;
+    animation: progress linear 10s forwards;
 }
