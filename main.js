@@ -58,7 +58,7 @@
                 const allowExtFiles = document.querySelector('meta[name="scroll-timeline-ext_css"]');
                 const styleElements = !!allowExtFiles && allowExtFiles.getAttribute('content') === 'TRUE' ? 'link[rel="stylesheet"], style' : 'style';
 
-                parsedCSS = {'timelines': {}, 'names': {}};
+                parsedCSS = {scroll: {}, view: {}, container: {}};
                 ScrollTimelinePolyfill.ForEachElementOf(styleElements, function(styleSheet){
                     if(styleSheet.tagName === 'LINK'){
                         parsedCSS = cssParser.parseTimelines(restService.get(styleSheet.href), parsedCSS);
@@ -189,8 +189,8 @@
              * @returns 
              */
             _findScrollControllers: function(parsedCSS, animationTimeline){
-                return Object.keys(parsedCSS['names']).map(function(selectorContainer){
-                    return parsedCSS['names'][selectorContainer].name === animationTimeline.name ? selectorContainer : null;
+                return Object.keys(parsedCSS['container']).map(function(selectorContainer){
+                    return parsedCSS['container'][selectorContainer].name === animationTimeline.name ? selectorContainer : null;
                 });
             },
 
@@ -202,8 +202,8 @@
             _sanitizeTimeline: function(parsedCSS){
                 const _this = this;
 
-                Object.keys(parsedCSS['timelines']).forEach(function(selectorTimeline){
-                    const animationTimeline =  parsedCSS['timelines'][selectorTimeline];
+                Object.keys(parsedCSS['scroll']).forEach(function(selectorTimeline){
+                    const animationTimeline =  parsedCSS['scroll'][selectorTimeline];
                     const scrollContainers = _this._findScrollControllers(parsedCSS, animationTimeline);
 
                     // Get the container of each element
@@ -233,7 +233,7 @@
                 scrollContainers.forEach(function(scrollContainer){
                     if(result) return;
                     const scrollContainerEl = (animationTimeline.name == 'none' ? document.createElement('div') : animationTimelineEl.closest(scrollContainer));
-                    const axis = parsedCSS['names'][scrollContainer] ? parsedCSS['names'][scrollContainer].axis : null;
+                    const axis = parsedCSS['container'][scrollContainer] ? parsedCSS['container'][scrollContainer].axis : null;
 
                     _this._pushAnimation(scrollContainerEl, animationTimelineEl, {axis: axis, type: scroll}, animationTimeline.specifity);
                     if(!!scrollContainerEl) result = true;
@@ -308,7 +308,6 @@
             _runAnimationTimelines: function(){
                 const AnimationTimeline = window.ScrollTimelinePolyfill.AnimationTimeline;
 
-                console.log(this._timelineAnimations);
                 this._timelineAnimations.forEach(function(timelineAnimation){
                     if(timelineAnimation.container)
                         new AnimationTimeline(timelineAnimation.container, timelineAnimation.element, timelineAnimation.options);

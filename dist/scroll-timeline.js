@@ -271,11 +271,11 @@ if (!Element.prototype.closest) {
                         const scrollTimelineNameMatch = _this._checkScrollTimelineName(declarations);
 
                         if(animationTimelineMatch){
-                            parsedTimelines['timelines'][selector] = _this._sanitizeAnimationTimeline(animationTimelineMatch, _this._calculateSpecificity(selector));
+                            parsedTimelines['scroll'][selector] = _this._sanitizeAnimationTimeline(animationTimelineMatch, _this._calculateSpecificity(selector));
                         }
 
                         if(scrollTimelineNameMatch){
-                            parsedTimelines['names'][selector] = scrollTimelineNameMatch
+                            parsedTimelines['container'][selector] = scrollTimelineNameMatch
                         }
                     });
                 }
@@ -300,11 +300,11 @@ if (!Element.prototype.closest) {
                 element.setAttribute('scroll-timeline-id', uuid);
 
                 if(animationTimelineMatch){
-                    parsedTimelines['timelines'][selector] = this._sanitizeAnimationTimeline(animationTimelineMatch, [999, 0, 0]);
+                    parsedTimelines['scroll'][selector] = this._sanitizeAnimationTimeline(animationTimelineMatch, [999, 0, 0]);
                 }
 
                 if(scrollTimelineNameMatch){
-                    parsedTimelines['names'][selector] = scrollTimelineNameMatch
+                    parsedTimelines['container'][selector] = scrollTimelineNameMatch
                 }
 
                 return parsedTimelines;
@@ -465,7 +465,6 @@ if (!Element.prototype.closest) {
              * @param { Object } options
              */
             constructor: function(scrollContainer, element, options){
-                console.log(scrollContainer, element, options);
                 this.scrollContainer = scrollContainer;
                 this.element = element;
                 this.options = options;
@@ -618,7 +617,7 @@ if (!Element.prototype.closest) {
                 const allowExtFiles = document.querySelector('meta[name="scroll-timeline-ext_css"]');
                 const styleElements = !!allowExtFiles && allowExtFiles.getAttribute('content') === 'TRUE' ? 'link[rel="stylesheet"], style' : 'style';
 
-                parsedCSS = {'timelines': {}, 'names': {}};
+                parsedCSS = {scroll: {}, view: {}, container: {}};
                 ScrollTimelinePolyfill.ForEachElementOf(styleElements, function(styleSheet){
                     if(styleSheet.tagName === 'LINK'){
                         parsedCSS = cssParser.parseTimelines(restService.get(styleSheet.href), parsedCSS);
@@ -749,8 +748,8 @@ if (!Element.prototype.closest) {
              * @returns 
              */
             _findScrollControllers: function(parsedCSS, animationTimeline){
-                return Object.keys(parsedCSS['names']).map(function(selectorContainer){
-                    return parsedCSS['names'][selectorContainer].name === animationTimeline.name ? selectorContainer : null;
+                return Object.keys(parsedCSS['container']).map(function(selectorContainer){
+                    return parsedCSS['container'][selectorContainer].name === animationTimeline.name ? selectorContainer : null;
                 });
             },
 
@@ -762,8 +761,8 @@ if (!Element.prototype.closest) {
             _sanitizeTimeline: function(parsedCSS){
                 const _this = this;
 
-                Object.keys(parsedCSS['timelines']).forEach(function(selectorTimeline){
-                    const animationTimeline =  parsedCSS['timelines'][selectorTimeline];
+                Object.keys(parsedCSS['scroll']).forEach(function(selectorTimeline){
+                    const animationTimeline =  parsedCSS['scroll'][selectorTimeline];
                     const scrollContainers = _this._findScrollControllers(parsedCSS, animationTimeline);
 
                     // Get the container of each element
@@ -793,7 +792,7 @@ if (!Element.prototype.closest) {
                 scrollContainers.forEach(function(scrollContainer){
                     if(result) return;
                     const scrollContainerEl = (animationTimeline.name == 'none' ? document.createElement('div') : animationTimelineEl.closest(scrollContainer));
-                    const axis = parsedCSS['names'][scrollContainer] ? parsedCSS['names'][scrollContainer].axis : null;
+                    const axis = parsedCSS['container'][scrollContainer] ? parsedCSS['container'][scrollContainer].axis : null;
 
                     _this._pushAnimation(scrollContainerEl, animationTimelineEl, {axis: axis, type: scroll}, animationTimeline.specifity);
                     if(!!scrollContainerEl) result = true;
@@ -868,7 +867,6 @@ if (!Element.prototype.closest) {
             _runAnimationTimelines: function(){
                 const AnimationTimeline = window.ScrollTimelinePolyfill.AnimationTimeline;
 
-                console.log(this._timelineAnimations);
                 this._timelineAnimations.forEach(function(timelineAnimation){
                     if(timelineAnimation.container)
                         new AnimationTimeline(timelineAnimation.container, timelineAnimation.element, timelineAnimation.options);

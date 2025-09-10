@@ -51,11 +51,11 @@
                         const scrollTimelineNameMatch = _this._checkScrollTimelineName(declarations);
 
                         if(animationTimelineMatch){
-                            parsedTimelines['timelines'][selector] = _this._sanitizeAnimationTimeline(animationTimelineMatch, _this._calculateSpecificity(selector));
+                            parsedTimelines['scroll'][selector] = _this._sanitizeAnimationTimeline(animationTimelineMatch, _this._calculateSpecificity(selector));
                         }
 
                         if(scrollTimelineNameMatch){
-                            parsedTimelines['names'][selector] = scrollTimelineNameMatch
+                            parsedTimelines['container'][selector] = scrollTimelineNameMatch
                         }
                     });
                 }
@@ -80,11 +80,11 @@
                 element.setAttribute('scroll-timeline-id', uuid);
 
                 if(animationTimelineMatch){
-                    parsedTimelines['timelines'][selector] = this._sanitizeAnimationTimeline(animationTimelineMatch, [999, 0, 0]);
+                    parsedTimelines['scroll'][selector] = this._sanitizeAnimationTimeline(animationTimelineMatch, [999, 0, 0]);
                 }
 
                 if(scrollTimelineNameMatch){
-                    parsedTimelines['names'][selector] = scrollTimelineNameMatch
+                    parsedTimelines['container'][selector] = scrollTimelineNameMatch
                 }
 
                 return parsedTimelines;

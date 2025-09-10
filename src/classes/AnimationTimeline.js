@@ -17,7 +17,6 @@
              * @param { Object } options
              */
             constructor: function(scrollContainer, element, options){
-                console.log(scrollContainer, element, options);
                 this.scrollContainer = scrollContainer;
                 this.element = element;
                 this.options = options;
