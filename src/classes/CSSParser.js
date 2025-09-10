@@ -51,10 +51,7 @@
                         const scrollTimelineNameMatch = _this._checkScrollTimelineName(declarations);
 
                         if(animationTimelineMatch){
-                            parsedTimelines['timelines'][selector] = {
-                                name: animationTimelineMatch,
-                                specifity: _this._calculateSpecificity(selector)
-                            }
+                            parsedTimelines['timelines'][selector] = _this._sanitizeAnimationTimeline(animationTimelineMatch, _this._calculateSpecificity(selector));
                         }
 
                         if(scrollTimelineNameMatch){
@@ -83,10 +80,7 @@
                 element.setAttribute('scroll-timeline-id', uuid);
 
                 if(animationTimelineMatch){
-                    parsedTimelines['timelines'][selector] = {
-                        name: animationTimelineMatch,
-                        specifity: [999, 0, 0]
-                    }
+                    parsedTimelines['timelines'][selector] = this._sanitizeAnimationTimeline(animationTimelineMatch, [999, 0, 0]);
                 }
 
                 if(scrollTimelineNameMatch){
@@ -137,6 +131,15 @@
             _checkAnimationTimeline: function(declarations){
                 const animationTimelineMatch = declarations.match(/animation-timeline\s*:\s*([^;]+)/);
                 return animationTimelineMatch ? animationTimelineMatch[1].trim() : null;
+            },
+
+            /**
+             * 
+             * @param { String } val 
+             * @param { Integer[] } specifity 
+             */
+            _sanitizeAnimationTimeline: function(val, specifity){
+                return {name: val, specifity: specifity};
             },
 
             /**

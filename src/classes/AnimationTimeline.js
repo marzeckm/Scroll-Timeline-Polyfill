@@ -14,12 +14,13 @@
              * 
              * @param { HTMLElement } scrollContainer 
              * @param { HTMLElement } element 
-             * @param { String } axis
+             * @param { Object } options
              */
-            constructor: function(scrollContainer, element, axis){
+            constructor: function(scrollContainer, element, options){
+                console.log(scrollContainer, element, options);
                 this.scrollContainer = scrollContainer;
                 this.element = element;
-                this.axis = axis;
+                this.options = options;
                 this._addScrollListener();
             },
 
@@ -30,7 +31,7 @@
              * @returns { Void }
              */
             _addScrollListener: function(){
-                if(['inline', 'x'].indexOf(this.axis) >= 0){
+                if(['inline', 'x'].indexOf(this.options.axis) >= 0){
                     this._addScrollListenerInline();
                 }else{
                     this._addScrollListenerBlock();
@@ -47,9 +48,11 @@
                 const _this = this;
 
                 this.scrollContainer.addEventListener('scroll', function(event){
+                    const element = (event.target == document ? document.documentElement : event.target);
+
                     const eventTime = _this._checkAnimationDuration();
-                    const maxScroll = event.target.scrollHeight - event.target.clientHeight;
-                    const newDelay = -(eventTime * ((1 / (maxScroll / event.target.scrollTop)))) + 's';
+                    const maxScroll = element.scrollHeight - element.clientHeight;
+                    const newDelay = -(eventTime * ((1 / (maxScroll / element.scrollTop)))) + 's';
                     _this.element.style.animationDelay = newDelay;
                     _this._applyAnimationChanges();
                 });
@@ -65,9 +68,11 @@
                 const _this = this;
 
                 this.scrollContainer.addEventListener('scroll', function(event){
+                    const element = (event.target == document ? document.documentElement : event.target);
+
                     const eventTime = _this._checkAnimationDuration();
-                    const maxScroll = event.target.scrollWidth - event.target.clientWidth;
-                    const newDelay = -(eventTime * ((1 / (maxScroll / event.target.scrollLeft)))) + 's';
+                    const maxScroll = element.scrollWidth - element.clientWidth;
+                    const newDelay = -(eventTime * ((1 / (maxScroll / element.scrollLeft)))) + 's';
                     _this.element.style.animationDelay = newDelay;
                     _this._applyAnimationChanges();
                 });

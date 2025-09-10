@@ -49,8 +49,7 @@ End Sub
 ' Copy all the data in target-file
 Call CopyOrAppendFile("./src/utils/saveGlobalNames.util.js", "./dist/scroll-timeline.js", False)
 Call CopyOrAppendFile("./src/utils/createClass.util.js", "./dist/scroll-timeline.js", True)
-Call CopyOrAppendFile("./src/utils/closest.util.js", "./dist/scroll-timeline.js", True)
-Call CopyOrAppendFile("./src/utils/generateUuid.util.js", "./dist/scroll-timeline.js", True)
+Call CopyOrAppendFile("./src/utils/polyfill.util.js", "./dist/scroll-timeline.js", True)
 Call CopyOrAppendFile("./src/classes/CSSParser.js", "./dist/scroll-timeline.js", True)
 Call CopyOrAppendFile("./src/classes/RestService.js", "./dist/scroll-timeline.js", True)
 Call CopyOrAppendFile("./src/classes/AnimationTimeline.js", "./dist/scroll-timeline.js", True)

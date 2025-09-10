@@ -47,3 +47,16 @@ section>* {
     background-color: red;
     animation: progress linear 10s forwards;
 }
+
+/* Test Object 5 */
+#container5{
+    border: 1px solid green;
+    height: 500px;
+    overflow-y: auto;
+}
+
+#container5 .progress{
+    animation: progress linear 10s forwards;
+    animation-timeline: scroll();
+    animation-range: 0% 100%;
+}

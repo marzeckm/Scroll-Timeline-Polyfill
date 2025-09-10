@@ -129,6 +129,7 @@ This polyfill supports:
    - `scroll-timeline-name`
    - `scroll-timeline-axis`
    - `animation-timeline`
+   - Functional scroll-timeline `scroll()`
 - Works with:
    - Inline styles
    - External stylesheets
@@ -141,7 +142,8 @@ This polyfill supports:
 
 This polyfill has the following known limitations:
 - CSS injected dynamically via JavaScript after initialization is not supported
-- Functional timelines like `scroll()` or `view()` are not yet supported
+- Functional view-timeline `view()` and view-timeline-properties are not yet supported
+- No support for `animation-range`
 
 ## Contribute
 
